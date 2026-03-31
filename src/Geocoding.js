@@ -104,7 +104,7 @@ const Geocoding = (props) => {
                             {/* Get GPS location */}
                             <button 
                                 type="button"
-                                className="btn btn-light border border-light-emphasis rounded-start-pill"
+                                className={props.darkMode ? "btn btn-dark border border-dark-emphasis rounded-start-pill" : "btn btn-light border border-light-emphasis rounded-start-pill"}
                                 onClick={getUserLocation}
                             >📍</button>
                             <input 
@@ -112,10 +112,10 @@ const Geocoding = (props) => {
                                 placeholder={placeholder}
                                 value={location} 
                                 onChange={handleInputChange}
-                                className="form-control bg-light"
+                                className={props.darkMode ? "form-control bg-dark text-light input-dark" : "form-control bg-light"}
                                 onFocus={handleInputFocus}>
                             </input>
-                            <span className="input-group-text bg-light rounded-end-pill">🔍</span>
+                            <span className={props.darkMode ? "input-group-text bg-dark rounded-end-pill" : "input-group-text bg-light rounded-end-pill"}>🔍</span>
                         </div>
                     </div>
                     
@@ -130,7 +130,7 @@ const Geocoding = (props) => {
                                     onClick={() => handleClick(index)} 
                                     onMouseEnter={handleInputFocus}
                                     onMouseLeave={handleInputBlur}
-                                    className="btn btn-light w-100"
+                                    className={props.darkMode ? "btn btn-dark w-100" : "btn btn-light w-100"}
                                     type="button"
                                     key={index}>
                                     {locationItem.name + ", " + locationItem.admin1 + ", " + locationItem.country}

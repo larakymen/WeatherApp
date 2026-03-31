@@ -23,7 +23,7 @@ const ALL_METRICS = [
     { key: 'Wave Period',           unit: 's',   marine: true  },
     { key: 'Swell Height',         unit: 'm',   marine: true  },
     { key: 'Swell Period',         unit: 's',   marine: true  },
-    { key: 'Sea Surface Temp',     unit: '°C',  marine: true  },
+    { key: 'Sea Surface Temperature',     unit: '°C',  marine: true  },
     { key: 'Sea Level Height',     unit: 'm',   marine: true  },
     { key: 'Wind Direction',       unit: '°',   marine: false, textOnly: true },
     { key: 'Wave Direction',       unit: '°',   marine: true,  textOnly: true },
@@ -116,7 +116,7 @@ const chartToDataUrl = (labels, values, title) => {
     return url
 }
 
-const PdfReport = ({ weatherData, geoData }) => {
+const PdfReport = ({ weatherData, geoData, darkMode}) => {
     const marineAvailable = weatherData?.marine?.current[2][1] != null
 
     const defaultKeys = ALL_METRICS
@@ -215,10 +215,9 @@ const PdfReport = ({ weatherData, geoData }) => {
     const visible = ALL_METRICS.filter(m => !m.marine || marineAvailable)
 
     return (
-        <div className="mt-2 mb-3">
+        <div className="row mx-auto">
             <button
-                className="btn btn-dark"
-                style={{ minWidth: '200px' }}
+                className={darkMode ? "btn btn-dark mb-2 mx-auto col-12 col-md-2" : "btn btn-light mb-2 mx-auto col-12 col-md-2"}
                 onClick={() => setOpen(o => !o)}
                 disabled={!weatherData}
             >
@@ -226,16 +225,12 @@ const PdfReport = ({ weatherData, geoData }) => {
             </button>
 
             {open && (
-                <div className="card border-0 shadow mt-2" style={{ backgroundColor: '#ffffff' }}>
+                <div className={darkMode ? "card border-0 shadow mb-1 bg-dark text-white" : "card border-0 shadow mb-1 bg-light text-dark"}>
                     <div className="card-body">
-                        <div className="d-flex align-items-center justify-content-between mb-2">
-                            <span className="fw-semibold small">Select what to include:</span>
-                            <div className="d-flex gap-2">
-                                <button className="btn btn-link btn-sm p-0 text-decoration-none" onClick={selectAll}>all</button>
-                                <span className="text-muted">|</span>
-                                <button className="btn btn-link btn-sm p-0 text-decoration-none" onClick={clearAll}>none</button>
-                            </div>
-                        </div>
+                        <p className='text-center'>Select what to include:
+                            <button className='btn btn-secondary btn-sm mx-1' onClick={selectAll}>Select All</button>
+                            <button className='btn btn-secondary btn-sm mx-1' onClick={clearAll}>Select None</button>
+                        </p>
                         <div className="row row-cols-2 row-cols-md-3 g-1 mb-3">
                             {visible.map(m => (
                                 <div key={m.key} className="col">
@@ -255,7 +250,7 @@ const PdfReport = ({ weatherData, geoData }) => {
                             ))}
                         </div>
                         <button
-                            className="btn btn-dark btn-sm"
+                            className={"btn btn-primary btn-sm"}
                             onClick={handleDownload}
                             disabled={generating || selected.length === 0}
                         >

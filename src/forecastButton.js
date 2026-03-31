@@ -3,8 +3,15 @@ const safety = ["rgba(186, 250, 255, 1)",
                 "rgba(204, 255, 186,1)", 
                 "rgba(255, 241, 183,1)", 
                 "rgba(255, 185, 164,1)"];
-const ForecastButton = ({safetynum, numval, units, text, click}) => {
+
+const safetyDark = ["rgb(110, 164, 168)", 
+                    "rgb(129, 168, 113)", 
+                    "rgb(181, 166, 115)", 
+                    "rgb(165, 110, 93)"];
+
+const ForecastButton = ({safetynum, numval, units, text, click, darkMode}) => {
   
+  const bgColour = darkMode ? (safetyDark[safetynum]) : (safety[safetynum])
   return( 
     <button 
       onClick={click} 
@@ -12,7 +19,7 @@ const ForecastButton = ({safetynum, numval, units, text, click}) => {
               width:"40vw", 
               maxWidth:"180px", 
               maxHeight:"180px", 
-              backgroundColor: (safety[safetynum])}}
+              backgroundColor: bgColour}}
       className="btn shadow-sm rounded-5 p-0" 
       type="button"
       data-bs-toggle="modal" 

@@ -5,6 +5,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* image from: https://unsplash.com/photos/an-aerial-view-of-a-body-of-water-7vHr9SPJXws */
+  background-image:url('./images/waves.jpeg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 code {
@@ -14,4 +19,17 @@ code {
 
 .hidden{
   display: none;
+}
+
+.nav-pills>li>a {
+    background-color:transparent;
+}
+
+.btn.btn-primary.active {
+  background-color: rgb(37, 33, 67);
+  border-color: rgb(18, 5, 30);
+}
+
+.input-dark::placeholder{
+  color: #70767c;
 }

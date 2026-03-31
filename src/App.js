@@ -3,13 +3,12 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import Weather from './Weather';
 import Geocoding from './Geocoding';
-import FutureWeather from './futureWeather';
 import ForecastButton from './forecastButton';
-import LineChart from './graphDisplay';
 import settingsLogo from './images/gear-solid.svg';
 import calendarLogo from './images/calendar-regular.svg';
 import mapLogo from './images/map-regular.svg';
 import warningLogo from './images/triangle-exclamation-solid.svg';
+import wavesImg from './images/waves.jpeg';
 import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import ForecastModal from './forecastModal';
@@ -37,6 +36,11 @@ const AppInner = () => {
     const [geoData, setGeoData] = useState('');
     const [weatherData, setWeatherData] = useState('');
     const [modalClick, setModalClick] = useState(null);
+    const [DModeFlag, setDModeFlag] = useState(false);
+    const [WindUnitFlag, setWindUnitFlag] = useState(false);
+    const [BoatSizeFlag, setBoatSizeFlag] = useState(false);
+    const [boatLength, setBoatLength] = useState('');
+    const [freeboard, setFreeboard] = useState('');
     const { convertTemp, tempLabel, convertSpeed, speedLabel, convertHeight, heightLabel,
             tempUnit, setTempUnit, speedUnit, setSpeedUnit, heightUnit, setHeightUnit } = useUnits();
 
@@ -144,6 +148,51 @@ const AppInner = () => {
         }
     }
 
+            const getSailingRecommendation = () => {
+
+                if (!weatherData || !weatherData.marine.current[2][1]) return null;
+                if (!boatLength || !freeboard) return { level: 0, reasons: [] };
+
+                const wind   = parseFloat(weatherData.forecast.current[4][1]);
+                const gusts  = parseFloat(weatherData.forecast.current[6][1]);
+                const waves  = parseFloat(weatherData.marine.current[2][1]);
+                const swell  = parseFloat(weatherData.marine.current[7][1]);
+                const wavePeriod  = parseFloat(weatherData.marine.current[8][1]);
+                const swellPeriod = parseFloat(weatherData.marine.current[9][1]);
+                const length = parseFloat(boatLength);
+                const fb     = parseFloat(freeboard);
+                
+
+                let reasons = [];
+
+                // Extreme Conditions (Level 3)
+                if (waves > length * 0.5) reasons.push("waves too large for vessel >1/2 length");
+                if (waves > fb) reasons.push("waves exceed freeboard");
+                if (wind > 38) reasons.push("extreme winds");
+                if (gusts > 50) reasons.push("extreme gusts");
+                if (swell > 4) reasons.push("dangerous swell");
+                if (wavePeriod < 4) reasons.push("very short wave period (rough sea)");
+                if (swellPeriod > 14) reasons.push("very long swell period");
+
+                if (reasons.length > 0) return { level: 3, reasons };
+
+                // Moderate Conditions (Level 2)
+                if (waves > length * 0.33) reasons.push("waves challenging for vessel length");
+                if (waves > fb * 0.75) reasons.push("waves near freeboard");
+                if (wind > 24) reasons.push("strong winds");
+                if (gusts > 37) reasons.push("strong gusts");
+                if (swell > 2) reasons.push("large swell");
+                if (wavePeriod < 6) reasons.push("choppy wave conditions (low wave period)");
+                if (swellPeriod > 12) reasons.push("Quite a long-period swell");
+
+                if (reasons.length > 0) return { level: 2, reasons };
+
+                // Safe Conditions (Level 1)
+                return { level: 1, reasons: [] };
+            };
+
+
+
     function UpdateMap(props) {
         const map = useMap();
 
@@ -154,24 +203,11 @@ const AppInner = () => {
                 <Marker position={props.center}/>
             );
     }
-
-    const weatherCode = weatherData ? weatherData.forecast.current[8][1] : null;
-    const bgClass = (() => {
-        if (weatherCode === null) return '';
-        if ([0,1].includes(weatherCode)) return 'weather-bg-sunny';
-        if ([2,3].includes(weatherCode)) return 'weather-bg-cloudy';
-        if ([45,48].includes(weatherCode)) return 'weather-bg-fog';
-        if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(weatherCode)) return 'weather-bg-rain';
-        if ([71,73,75,77,85,86].includes(weatherCode)) return 'weather-bg-snow';
-        if ([95,96,99].includes(weatherCode)) return 'weather-bg-storm';
-        return '';
-    })();
-
     return (
         <>
-        <div className={`container-fluid p-0 pb-5 ${bgClass}`} style={{minHeight:"100vh",backgroundColor:"#cbd2e3"}}>
+        <div className="container-fluid p-0 pb-5" style={{minHeight:"100vh", backgroundColor: DModeFlag ? "rgba(35, 65, 120, 0.7)" : "rgba(203, 210, 227, 0.7)", backdropFilter:"blur(1px)"}}>
             <div className="p-3 pb-1">
-                <Geocoding sendData={setGeoData}/>
+                <Geocoding sendData={setGeoData} darkMode={DModeFlag}/>
                     {geoData && (
                     <>
                     <Weather
@@ -184,31 +220,68 @@ const AppInner = () => {
             </div>
  
      
+            <div className='tab-content pb-4' id="app-tabcontent" style={{color: DModeFlag?"whitesmoke":"black"}}>
+                <div className="tab-pane p-3" id="settings">
+                    <div className={DModeFlag ? "card mx-auto p-3 m-2 bg-dark" : "card mx-auto p-3 m-2 bg-light"} style={{color: DModeFlag?"whitesmoke":"black"}}>
+                        <h3>Settings</h3>
+                        <div className="d-grid gap-3" >
+                            <div className="form-check form-switch">
+                                <input className="form-check-input" type="checkbox" id="DarkmodeSwitchCheck" onClick={() => setDModeFlag(!DModeFlag)}></input>
+                                <label className="form-check-label" htmlFor="DarkmodeSwitchCheck">Dark Mode</label>
+                            </div>
+                            <div>
+                                <h4>Wind Speed Units:</h4>
+                                <div className="form-check">
+                                    <input className="form-check-input" type="radio" name="WindUnitRadios" id="WindUnitRadios1" onClick={() => setWindUnitFlag(true)} defaultChecked></input>
+                                    <label className="form-check-label" htmlFor="WindUnitRadios1">
+                                        MPH
+                                    </label>
+                                </div>
+                                <div className="form-check">
+                                    <input className="form-check-input" type="radio" name="WindUnitRadios" id="WindUnitRadios2" onClick={() => setWindUnitFlag(false)}></input>
+                                    <label className="form-check-label" htmlFor="WindUnitRadios2">
+                                        Knots
+                                    </label>
+                                </div>
+                        
+                                <div>
+                                    <h4>Vessel Settings:</h4>
+                                    <div>
+                                        <p> Boat length: (metres)</p>
+                                        <input
+                                            type="number"
+                                            placeholder = "0"
+                                            value = {boatLength}
+                                            onChange={(e) => setBoatLength(e.target.value)}
+                                            />
 
-            
-            <div className='tab-content pb-4' id="app-tabcontent">
-                <div className="tab-pane" id="settings">
-                    <div className="container p-4">
-                        <h5 className="mb-3">Units</h5>
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold">Temperature</label>
-                            <div className="btn-group d-block">
-                                <button className={`btn btn-sm ${tempUnit==='C'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setTempUnit('C')}>°C</button>
-                                <button className={`btn btn-sm ${tempUnit==='F'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setTempUnit('F')}>°F</button>
+                                            <p>Freeboard Height: (metres)</p>
+                                            <input
+                                                type="number"
+                                                className="form-control"
+                                                placeholder="0"
+                                                value={freeboard}
+                                                onChange={(e) => setFreeboard(e.target.value)}
+                                            />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold">Wind Speed</label>
-                            <div className="btn-group d-block">
-                                <button className={`btn btn-sm ${speedUnit==='mph'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setSpeedUnit('mph')}>mph</button>
-                                <button className={`btn btn-sm ${speedUnit==='kph'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setSpeedUnit('kph')}>kph</button>
-                            </div>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold">Height / Distance</label>
-                            <div className="btn-group d-block">
-                                <button className={`btn btn-sm ${heightUnit==='m'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setHeightUnit('m')}>m</button>
-                                <button className={`btn btn-sm ${heightUnit==='ft'?'btn-dark':'btn-outline-secondary'}`} onClick={()=>setHeightUnit('ft')}>ft</button>
+                            <div>
+                                <h5 className="mb-2">Units</h5>
+                                <div className="mb-2">
+                                    <label className="form-label fw-semibold">Temperature</label>
+                                    <div className="btn-group d-block">
+                                        <button className={`btn btn-sm ${tempUnit==='C' ? 'btn-dark' : 'btn-outline-secondary'}`} onClick={() => setTempUnit('C')}>°C</button>
+                                        <button className={`btn btn-sm ${tempUnit==='F' ? 'btn-dark' : 'btn-outline-secondary'}`} onClick={() => setTempUnit('F')}>°F</button>
+                                    </div>
+                                </div>
+                                <div className="mb-2">
+                                    <label className="form-label fw-semibold">Height / Distance</label>
+                                    <div className="btn-group d-block">
+                                        <button className={`btn btn-sm ${heightUnit==='m' ? 'btn-dark' : 'btn-outline-secondary'}`} onClick={() => setHeightUnit('m')}>m</button>
+                                        <button className={`btn btn-sm ${heightUnit==='ft' ? 'btn-dark' : 'btn-outline-secondary'}`} onClick={() => setHeightUnit('ft')}>ft</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -234,7 +307,7 @@ const AppInner = () => {
                         </>
                         }
                         {weatherData && geoData && (
-                            <PdfReport weatherData={weatherData} geoData={geoData} />
+                            <PdfReport weatherData={weatherData} geoData={geoData} darkMode={DModeFlag}/>
                         )}
                         <>
                             <div className="row row-cols-2 row-cols-md-4 row-gap-2 column-gap-2 mx-auto justify-content-center p-1">
@@ -258,6 +331,7 @@ const AppInner = () => {
                                     units={"mm"}
                                     text={"Precipitation"}
                                     click={() =>setModalClick("Precipitation")}
+                                    darkMode={DModeFlag}
                                 />
 
                                 {/* Sunrise / Sunset standalone card — display only, no modal */}
@@ -322,6 +396,7 @@ const AppInner = () => {
                                     units={heightLabel()}
                                     text={"Wave Height"}
                                     click={() =>setModalClick("Wave Height")}
+                                    darkMode={DModeFlag}
                                 />
                                 {/* Wave Direction with compass + degrees */}
                                 <button
@@ -361,6 +436,7 @@ const AppInner = () => {
                                     units={tempLabel()}
                                     text={"Sea Surface Temperature"}
                                     click={() =>setModalClick("Sea Surface Temperature")}
+                                    darkMode={DModeFlag}
                                 />
 
                                 {/* Swell Direction with compass + degrees */}
@@ -383,6 +459,7 @@ const AppInner = () => {
                                     units={heightLabel()}
                                     text={"Swell Height"}
                                     click={() =>setModalClick("Swell Height")}
+                                    darkMode={DModeFlag}
                                 />
                                 <ForecastButton
                                     safetynum={safetyLookup("wavePeriod", parseFloat(weatherData.marine.current[8][1] ?? 0))}
@@ -390,6 +467,7 @@ const AppInner = () => {
                                     units={"s"}
                                     text={"Wave Period"}
                                     click={() => setModalClick("Wave Period")}
+                                    darkMode={DModeFlag}
                                 />
                                 <ForecastButton
                                     safetynum={safetyLookup("wavePeriod", parseFloat(weatherData.marine.current[9][1] ?? 0))}
@@ -397,25 +475,48 @@ const AppInner = () => {
                                     units={"s"}
                                     text={"Swell Period"}
                                     click={() => setModalClick("Swell Period")}
+                                    darkMode={DModeFlag}
                                 />
                                 </>}
                             </div>
                             <div className='modal' id="fModal">
                                 <div className="modal-dialog modal-lg modal-fullscreen-md-down">
-                                    <div className='modal-content'>
-                                        <div className='modal-header'>
-                                             {modalClick && <h2 className="modal-title">{modalClick}</h2>}
-                                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <div className={DModeFlag ? 'modal-content bg-dark text-light' :'modal-content bg-light'}>
+                                        <div className={DModeFlag ? 'modal-header text-light' : 'modal-header text-dark'}>
+                                             {modalClick && <h2 className="modal-title fw-bold">{modalClick}</h2>}
+                                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" data-bs-theme={DModeFlag ? "dark": "light"}></button>
                                         </div>
-                                        <div className='modal-body'>
+                                        <div className={DModeFlag ? 'modal-body text-light' : 'modal-body text-dark'}>
                                             {weatherData && geoData && 
-                                                <ForecastModal wData={weatherData} modalClick={modalClick}/>
+                                                <ForecastModal wData={weatherData} modalClick={modalClick} darkMode={DModeFlag}/>
                                             }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </>
+
+
+
+                        
+                        {weatherData && weatherData.marine.current[2][1] && (() => {
+                            const result = getSailingRecommendation();
+                            if (result === null) return null;
+
+                            const level = result.level;
+                            const reason = result.reasons.join(", ");
+
+                            const colours  = ['rgba(186,250,255,1)', 'rgba(204,255,186,1)', 'rgba(255,241,183,1)', 'rgba(255,185,164,1)'];
+                            const messages = ['Set your vessel details in Settings for a sailing recommendation.', '✅ Good sailing conditions', '⚠️ Challenging, sail with care', '❗ Dangerous,  not recommended'];
+                            return (
+                                <div style={{backgroundColor: colours[level], marginTop: '100px'}} className="p-3 rounded-4 shadow-sm text-center">
+                                    <h5>{messages[level]}</h5>
+                                    {reason && <p className="mb-0">Due to: {reason}</p>}
+                                </div>
+                            );
+                        })()}
+
+
                     
                         <div id="LineChart" className={"hidden"}>
                             {weatherData &&(
@@ -451,18 +552,18 @@ const AppInner = () => {
             
         </div>
         <div>
-            <nav className='navbar fixed-bottom bg-light justify-content-center'>
+            <nav className={DModeFlag ? "navbar fixed-bottom bg-dark justify-content-center" : "navbar fixed-bottom bg-light justify-content-center"}>
                 <ul className="nav nav-pills justify-content-center row" role="tablist">
-                    <li className="nav-item col justify-content-center text-center">
-                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#settings" type="button"><img src={settingsLogo} style={{height:'20px'}}/></a>
+                    <li className={DModeFlag ? "nav-item text-light col justify-content-center text-center bg-dark" : "nav-item nav-light col justify-content-center text-center"}>
+                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#settings" type="button"><img src={settingsLogo} style={DModeFlag ?{height:'20px',filter:'invert(100%)'}:{height:'20px'}}/></a>
                         <small>Settings</small>
                     </li>
-                    <li className="nav-item col justify-content-center text-center">
-                        <a className="nav-link active mx-auto" data-bs-toggle="pill" data-bs-target="#forecasts" type="button"><img src={calendarLogo} style={{height:'20px'}}/></a>
+                    <li className={DModeFlag ? "nav-item text-light col justify-content-center text-center" : "nav-item nav-light col justify-content-center text-center"}>
+                        <a className="nav-link active mx-auto" data-bs-toggle="pill" data-bs-target="#forecasts" type="button"><img src={calendarLogo} style={DModeFlag ?{height:'20px',filter:'invert(100%)'}:{height:'20px'}}/></a>
                         <small>Forecasts</small>
                     </li>
-                    <li className="nav-item col justify-content-center text-center">
-                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#map" type="button"><img src={mapLogo} style={{height:'20px'}}/></a>
+                    <li className={DModeFlag ? "nav-item text-light col justify-content-center text-center" : "nav-item nav-light col justify-content-center text-center"}>
+                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#map" type="button"><img src={mapLogo} style={DModeFlag ?{height:'20px',filter:'invert(100%)'}:{height:'20px'}}/></a>
                         <small>Map</small>
                     </li>
                 </ul>

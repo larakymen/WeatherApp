@@ -37,22 +37,7 @@ const Weather = (props) => {
 
             props.sendData({forecast:farray, marine:marray})
 
-            console.log('=== forecast current ===')
-            console.log(farray.current)
-            console.log('=== forecast daily ===')
-            console.log(farray.daily)
-            console.log('=== forecast hourly (first 6h) ===')
-            farray.hourly.forEach(([key, val]) => {
-                if (key !== 'time') console.log(key, Array.isArray(val) ? val.slice(0,6) : val)
-            })
-            console.log('=== marine current ===')
-            console.log(marray.current)
-            console.log('=== marine daily ===')
-            console.log(marray.daily)
-            console.log('=== marine hourly (first 6h) ===')
-            marray.hourly.forEach(([key, val]) => {
-                if (key !== 'time') console.log(key, Array.isArray(val) ? val.slice(0,6) : val)
-            })
+           
         }
         catch (error) {
             console.error(error);

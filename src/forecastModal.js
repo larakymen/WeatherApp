@@ -24,7 +24,7 @@ import FutureWeather from "./futureWeather"
 // [0]=time [1]=wave_height [2]=sea_level_height_msl [3]=wave_direction [4]=swell_wave_height
 // [5]=swell_wave_direction [6]=sea_surface_temperature [7]=wave_period [8]=swell_wave_period
 
-const ForecastModal = ({ wData, modalClick }) => {
+const ForecastModal = ({ wData, modalClick, darkMode }) => {
     if (!wData || !modalClick) return null;
 
     const f = wData.forecast;
@@ -40,6 +40,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={f.hourly[0][1]}
             HourlyValArr={f.hourly[1][1]}
             units="°C"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Precipitation") return (
@@ -52,6 +53,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={f.hourly[0][1]}
             HourlyValArr={f.hourly[7][1]}
             units="mm"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wind Speed") return (
@@ -64,6 +66,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={f.hourly[0][1]}
             HourlyValArr={f.hourly[3][1]}
             units="mph"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wind Direction") return (
@@ -76,6 +79,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={f.hourly[0][1]}
             HourlyValArr={f.hourly[6][1]}
             units="°"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wind Gusts") return (
@@ -88,6 +92,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={f.hourly[0][1]}
             HourlyValArr={f.hourly[8][1]}
             units="mph"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wave Height") return (
@@ -99,6 +104,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[1][1]}
             units="m"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wave Direction") return (
@@ -110,6 +116,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[3][1]}
             units="°"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Sea Level Height") return (
@@ -121,6 +128,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[2][1]}
             units="m"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Sea Surface Temperature") return (
@@ -132,6 +140,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[6][1]}
             units="°C"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Swell Direction") return (
@@ -143,6 +152,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[5][1]}
             units="°"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Swell Height") return (
@@ -154,6 +164,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[4][1]}
             units="m"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Wave Period") return (
@@ -165,6 +176,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[7][1]}
             units="s"
+            darkMode={darkMode}
         />
     );
     if (modalClick === "Swell Period") return (
@@ -176,6 +188,7 @@ const ForecastModal = ({ wData, modalClick }) => {
             HourlyTimeArr={m.hourly[0][1]}
             HourlyValArr={m.hourly[8][1]}
             units="s"
+            darkMode={darkMode}
         />
     );
 

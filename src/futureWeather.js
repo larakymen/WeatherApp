@@ -14,7 +14,7 @@ const weatherIconLookup = {
     95: "⛈️", 96: "⛈️", 99: "⛈️"
 };
 
-const FutureWeather = ({ currentVal, currentLabel, DailyTimeArr, DailyValArr, DailyIconArr, HourlyTimeArr, HourlyValArr, units }) => {
+const FutureWeather = ({ currentVal, currentLabel, DailyTimeArr, DailyValArr, DailyIconArr, HourlyTimeArr, HourlyValArr, units,darkMode }) => {
 
     if (!DailyTimeArr || !DailyValArr) return <p>Loading...</p>;
 
@@ -31,7 +31,7 @@ const FutureWeather = ({ currentVal, currentLabel, DailyTimeArr, DailyValArr, Da
 
     return (
         <div>
-            <div className="card mb-3 border-0 shadow-sm" style={{ backgroundColor: "#eef1fb" }}>
+            <div className={darkMode ? "card mb-3 border-0 shadow-sm bg-dark text-light" :  "card mb-3 border-0 shadow-sm bg-light text-dark"}>
                 <div className="card-body">
                     <h3 className="card-title mb-1">{currentVal} {units}</h3>
                     <p className="card-text mb-0" style={{ color: "#5a6acf" }}>{currentLabel}</p>
@@ -44,9 +44,9 @@ const FutureWeather = ({ currentVal, currentLabel, DailyTimeArr, DailyValArr, Da
                 </div>
             )}
 
-            <div className="d-flex overflow-auto gap-2 pb-1">
+            <div className="d-flex overflow-auto gap-2 p-3 mx-auto justify-content-evenly">
                 {DailyTimeArr.map((date, index) => (
-                    <div key={index} className="card border-0 shadow-sm text-center flex-shrink-0" style={{ minWidth: "72px", backgroundColor: "#eef1fb" }}>
+                    <div key={index} className={darkMode ? "card border-0 shadow-sm text-center flex-shrink-0 bg-secondary text-light": "card border-0 shadow-sm text-center flex-shrink-0"} style={{ minWidth: "72px"}}>
                         <div className="card-body p-2">
                             {DailyIconArr && (
                                 <div style={{ fontSize: "1.4rem", lineHeight: 1.2 }}>
@@ -54,7 +54,7 @@ const FutureWeather = ({ currentVal, currentLabel, DailyTimeArr, DailyValArr, Da
                                 </div>
                             )}
                             <div className="fw-semibold small">{DailyValArr[index]}{units}</div>
-                            <small className="text-muted">
+                            <small className="text-body-secondary">
                                 {new Date(date).toLocaleDateString('en-GB', { weekday: 'short' })}
                             </small>
                         </div>
